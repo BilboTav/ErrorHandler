@@ -1,0 +1,23 @@
+{
+    "name": "bilbofox/error-handler",
+    "type": "library",
+    "description": "",
+    "authors": [
+        {
+            "name": "Michal Kvita",
+            "email": "Mikvt@seznam.cz",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8"
+    },
+    "suggest": {
+
+    },
+    "autoload": {
+        "psr-4": {
+            "Bilbofox\\": "src/"
+        }
+    }
+}

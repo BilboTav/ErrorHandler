@@ -1,2 +1,3 @@
 # ErrorHandler
-Simple PHP Error handling package
+
+Simple PHP 8 Error handling package
