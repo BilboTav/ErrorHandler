@@ -7,18 +7,33 @@ use ErrorException;
 use Throwable;
 
 /**
- *
+ * Universal error handler for PHP 8 with custom handling of errors
+ * All errors are transformed into exceptions
  *
  * @author Michal Kvita <Mikvt@seznam.cz>
  */
 final class ErrorHandler
 {
+    private const FATAL_ERROR_TYPES = [
+        E_ERROR,
+        E_CORE_ERROR,
+        E_COMPILE_ERROR,
+        E_PARSE,
+        E_RECOVERABLE_ERROR,
+        E_USER_ERROR
+    ];
 
     /**
-     * Register global handler for exceptions and PHP errors (transformed into exceptions)
+     * Register a global handler for exceptions and PHP errors (transformed into exceptions)
      *
-     * @param callable $handler
-     * @param callable|null $exceptionBuilder
+     * @param int $errorLevels Error reporting levels to report - pass the same value as to error_reporting() function
+     * @param callable $handler Logic for handling exceptions - callback is the same as passed to set_exception_handler() function
+     * handler(Throwable $ex): void
+     * @param callable|null $exceptionBuilder Custom exception builder, by default, transforms native errors into ErrorException class
+     *
+     * @throws Throwable
+     * @see set_exception_handler
+     *
      * @return void
      */
     public static function register(int $errorLevels, callable $handler, ?callable $exceptionBuilder = null): void
@@ -48,13 +63,13 @@ final class ErrorHandler
 
         set_exception_handler($handler);
 
-        // Fatal errors needs to be handled in shutdown handler
+        // Fatal errors need to be handled in the shutdown handler
         register_shutdown_function(static function () use ($handler, $exceptionBuilder): void {
             $error = error_get_last();
             if ($error !== null) {
                 extract($error);
 
-                if (in_array($type, [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE, E_RECOVERABLE_ERROR, E_USER_ERROR], true)) {
+                if (in_array($type, self::FATAL_ERROR_TYPES, true)) {
                     $handler($exceptionBuilder(type: $type, message: $message, file: $file, line: $line));
                 }
             }
